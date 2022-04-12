@@ -2,6 +2,7 @@ package br.com.lucene.filter.service;
 
 import br.com.lucene.filter.repository.model.QuestionAnswerType;
 import br.com.lucene.filter.service.model.QuestionAnswerDTO;
+import br.com.lucene.filter.util.Util;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.br.BrazilianAnalyzer;
 import org.apache.lucene.document.Document;
@@ -86,6 +87,7 @@ public class LuceneService {
             QuestionAnswerDTO dto = new QuestionAnswerDTO();
             dto.setQuestion(hitDoc.get(CONST_QUESTION));
             dto.setAnswer(hitDoc.get(CONST_ANSWER));
+            dto.setType(QuestionAnswerType.valueOf(hitDoc.get(CONST_TYPE)));
             questionAnswerDTOS.add(dto);
         }
         directoryReader.close();
@@ -94,15 +96,13 @@ public class LuceneService {
     }
 
     private static String pdfToText(String path) throws IOException {
-        File f = new File(path);
+        File f = Util.getFile(path);
         PDFParser parser = new PDFParser(new RandomAccessFile(f, "r"));
         parser.parse();
         COSDocument cosDoc = parser.getDocument();
         PDFTextStripper pdfStripper = new PDFTextStripper();
         PDDocument pdDoc = new PDDocument(cosDoc);
-        return pdfStripper.getText(pdDoc) != null ?
-                pdfStripper.getText(pdDoc).replaceAll("\r\n", "")
-                : "";
+        return pdfStripper.getText(pdDoc);
     }
 
 }
